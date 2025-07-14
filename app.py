@@ -13,7 +13,16 @@ def fetch_poster(movie_id):
 
 
 def recommend(movie):
+    # DEBUGGING
+    print("Movie selected:", movie)
+    print("Total movies in dataset:", len(movies))
+    print("Movies column sample:", movies['title'].head(3).tolist())
+
     movie_index = movies[movies['title'] == movie].index[0]
+
+    print("Movie index found:", movie_index)
+    print("Similarity matrix length:", len(similarity))
+
     distances = similarity[movie_index]
     movies_list = sorted(list(enumerate(distances)), reverse=True, key=lambda x: x[1])[1:6]
 
@@ -30,9 +39,22 @@ def recommend(movie):
 movies_dict = pickle.load(open('movie_dict.pkl', 'rb'))
 movies = pd.DataFrame(movies_dict)
 
+# DEBUGGING
+print("Loaded movie_dict.pkl successfully")
+print("Number of movies loaded:", len(movies))
+
 # Load compressed similarity file (.lz4)
 with lz4.frame.open('compressed_similarity.pkl.lz4', 'rb') as f:
     similarity = pickle.load(f)
+
+print("Loaded compressed_similarity.pkl.lz4 successfully")
+print("Similarity shape/length:", len(similarity))
+
+st.set_page_config(
+    page_title="Movie Recommender",
+    page_icon=":clapper:",
+    layout="centered"
+)
 
 st.title('Movie Recommender System')
 
