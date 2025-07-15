@@ -11,8 +11,9 @@ def fetch_poster(movie_id):
         response = requests.get(
             f'https://api.themoviedb.org/3/movie/{movie_id}?api_key=d704d0412d19b5ae8e990d1d4c8eaff7')
         data = response.json()
-        return "http://image.tmdb.org/t/p/w500/" + data['poster_path']
-    except:
+        return "http://image.tmdb.org/t/p/w500/" + data.get('poster_path', '')
+    except Exception as e:
+        print("Poster fetch error:", e)
         return "https://via.placeholder.com/300x450?text=No+Image"
 
 
@@ -39,21 +40,34 @@ st.set_page_config(
 
 st.title('🎥 Movie Recommender System')
 
-# Load movie_dict
-if os.path.exists('movie_dict.pkl'):
+# Load movie_dict.pkl
+if not os.path.exists('movie_dict.pkl'):
+    st.error("❌ 'movie_dict.pkl' file not found in project directory.")
+    st.stop()
+
+try:
     with open('movie_dict.pkl', 'rb') as f:
         movies_dict = pickle.load(f)
     movies = pd.DataFrame(movies_dict)
-    st.write(f"✅ Loaded {len(movies)} movies.")
-else:
-    st.error("❌ movie_dict.pkl not found.")
+    st.success(f"✅ Loaded {len(movies)} movies.")
+except Exception as e:
+    st.error(f"❌ Error loading movie_dict.pkl: {e}")
     st.stop()
 
-# Load compressed similarity
+# Load compressed similarity.pkl.lz4
+if not os.path.exists('compressed_similarity.pkl.lz4'):
+    st.error("❌ 'compressed_similarity.pkl.lz4' file not found in project directory.")
+    st.stop()
+
 try:
     with lz4.frame.open('compressed_similarity.pkl.lz4', 'rb') as f:
         similarity = pickle.load(f)
-    st.write(f"✅ Similarity matrix loaded. Length: {len(similarity)}")
+
+    if similarity == ... or similarity is None:
+        raise ValueError("Similarity data is invalid: found ellipsis or None")
+
+    st.success(f"✅ Similarity matrix loaded. Length: {len(similarity)}")
+
 except Exception as e:
     st.error(f"❌ Failed to load similarity matrix: {e}")
     st.stop()
